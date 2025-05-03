@@ -1,5 +1,4 @@
 import React from 'react';
-import { findDOMNode } from 'react-dom';
 import invariant from 'invariant';
 import warning from 'warning';
 
@@ -24,6 +23,7 @@ class InputElement extends React.Component {
   previousSelection = null
   selectionDeferId = null
   saveSelectionLoopDeferId = null
+  inputRef = React.createRef();
 
   constructor(props) {
     super(props);
@@ -202,30 +202,22 @@ class InputElement extends React.Component {
   }
 
   getInputDOMNode = () => {
-    if (!this.mounted) {
-      return null;
-    }
-
-    let input = findDOMNode(this);
-    const isDOMNode = typeof window !== 'undefined'
-                      &&
-                      input instanceof window.Element;
-
-    // workaround for react-test-renderer
-    // https://github.com/sanniassin/react-input-mask/issues/147
-    if (input && !isDOMNode) {
-      return null;
-    }
-
-    if (input.nodeName !== 'INPUT') {
-      input = input.querySelector('input');
-    }
-
+    if (!this.mounted) return null;
+  
+    const input = this.inputRef.current;
+  
     if (!input) {
-      throw new Error('react-input-mask: inputComponent doesn\'t contain input node');
+      throw new Error("react-input-mask: inputComponent doesn't contain input node");
     }
-
-    return input;
+  
+    if (input.nodeName === 'INPUT') return input;
+  
+    const nestedInput = input.querySelector('input');
+    if (!nestedInput) {
+      throw new Error("react-input-mask: inputComponent doesn't contain input node");
+    }
+  
+    return nestedInput;
   }
 
   getInputValue = () => {
@@ -541,6 +533,7 @@ class InputElement extends React.Component {
   }
 
   handleRef = (ref) => {
+    this.inputRef.current = ref;
     if (this.props.children == null && isFunction(this.props.inputRef)) {
       this.props.inputRef(ref);
     }
