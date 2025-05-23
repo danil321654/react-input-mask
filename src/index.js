@@ -339,6 +339,10 @@ class InputElement extends React.Component {
       return true;
     }
 
+    if (!previousValue || !previousSelection || !selection || !value) {
+      return false;
+    }
+
     // if cursor has moved to the end while previousSelection forbids it
     // then it must be autofill
     return previousSelection.end < previousValue.length
