@@ -203,20 +203,17 @@ class InputElement extends React.Component {
 
   getInputDOMNode = () => {
     if (!this.mounted) return null;
-  
+
     const input = this.inputRef.current;
-  
+
     if (!input) {
-      throw new Error("react-input-mask: inputComponent doesn't contain input node");
+      return null;
     }
-  
+
     if (input.nodeName === 'INPUT') return input;
-  
+
     const nestedInput = input.querySelector('input');
-    if (!nestedInput) {
-      throw new Error("react-input-mask: inputComponent doesn't contain input node");
-    }
-  
+
     return nestedInput;
   }
 
@@ -283,6 +280,14 @@ class InputElement extends React.Component {
   getSelection = () => {
     const input = this.getInputDOMNode();
 
+    if (!input) {
+      return {
+        start: 0,
+        end: 0,
+        length: 0
+      };
+    }
+
     return getInputSelection(input);
   }
 
@@ -313,6 +318,10 @@ class InputElement extends React.Component {
 
   isInputAutofilled = (value, selection, previousValue, previousSelection) => {
     const input = this.getInputDOMNode();
+
+    if (!input) {
+      return false;
+    }
 
     // only check for positive match because it will be false negative
     // in case of autofill simulation in tests
